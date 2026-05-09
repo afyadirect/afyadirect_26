@@ -3,7 +3,7 @@ description: A telemedicine platform for East Africa
 publish_to: 'none'
 
 environment:
-  sdk: ">=3.9.0 <4.0.0"
+  sdk: ">=3.4.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -11,6 +11,11 @@ dependencies:
   # Corrected: flutter_localizations must be at the same level as flutter
   flutter_localizations:
     sdk: flutter
+    # Google Sign-In
+  google_sign_in: ^6.1.5
+  
+  # For web Google Sign-In
+  firebase_auth_web: ^5.8.0
 
   # Firebase
   firebase_core: ^2.24.2
@@ -35,7 +40,7 @@ dependencies:
   dio: ^5.3.3
 
   # Utilities
-  intl: ^0.20.1
+  intl: ^0.19.0
 
   # Charts
   fl_chart: ^0.68.0
@@ -69,3 +74,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/icons/
+    # If you want to be specific:
+    # - assets/icons/google.png

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "198463605158",
+    "firebase_url": "https://afyadirect-f0ae1-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "afyadirect-f0ae1",
+    "storage_bucket": "afyadirect-f0ae1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:198463605158:android:dfe190f247d6c4dfdc6767",
+        "android_client_info": {
+          "package_name": "com.example.afyadirect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "198463605158-dm1s65fudom8s7nnkjd8l8rb61248n58.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCn_jiLwaNX4gWehd0-R2RFGgCzmdwDnMI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "198463605158-dm1s65fudom8s7nnkjd8l8rb61248n58.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "198463605158-mg6gl7m7ei976atc9cc2agnpddcafr21.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.afyadirect"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
