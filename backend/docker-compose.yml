@@ -1,60 +1,70 @@
-version: '3.8'
-
 services:
   backend:
-    build: ./backend
+    build: .
     container_name: afyadirect-backend
     ports:
-      - "8000:8000"
+      - "8080:8000"
     environment:
-      - REDIS_URL=redis://redis:6379
+      # Use the service name 'redis_new' as the hostname
+      - REDIS_URL=redis://redis_new:6379
       - APP_ENV=production
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - ALLOWED_FILE_TYPES=["image/jpeg","image/png"]
+
     depends_on:
-      - redis
+      - redis_new
     volumes:
-      - ./backend/firebase-adminsdk.json:/app/firebase-adminsdk.json
-      - ./backend/logs:/app/logs
+      - .:/app
+      - ./firebase-adminsdk.json:/app/firebase-adminsdk.json
+      - ./logs:/app/logs
     restart: unless-stopped
     networks:
       - afyadirect-network
 
-  redis:
+  redis_new:
     image: redis:7-alpine
-    container_name: afyadirect-redis
+    container_name: afyadirect-redis-v2
+    init: true  # <--- CRITICAL: Prevents the "permission denied" zombie state
     ports:
-      - "6379:6379"
+      - "6385:6379"
     volumes:
-      - redis-data:/data
-    restart: unless-stopped
+      - redis-data-v2:/data
+    restart: always # <--- Changed to always for better recovery
     networks:
       - afyadirect-network
 
   celery-worker:
-    build: ./backend
+    build: .
     container_name: afyadirect-celery-worker
-    command: celery -A app.worker.celery worker --loglevel=info
+    # Ensure this path matches your directory structure (e.g., app/worker.py)
+    command: celery -A app.worker worker --loglevel=info
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://redis_new:6379
+      - APP_ENV=production
+      - PYTHONPATH=/app # <--- Helps Celery find your modules
     depends_on:
-      - redis
+      - redis_new
       - backend
     volumes:
-      - ./backend:/app
+      - .:/app
     restart: unless-stopped
     networks:
       - afyadirect-network
 
   celery-beat:
-    build: ./backend
+    build: .
     container_name: afyadirect-celery-beat
-    command: celery -A app.worker.celery beat --loglevel=info
+    command: celery -A app.worker beat --loglevel=info
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://redis_new:6379
+      - APP_ENV=production
+      - PYTHONPATH=/app
     depends_on:
-      - redis
+      - redis_new
       - backend
     volumes:
-      - ./backend:/app
+      - .:/app
     restart: unless-stopped
     networks:
       - afyadirect-network
@@ -64,4 +74,4 @@ networks:
     driver: bridge
 
 volumes:
-  redis-data:
+  redis-data-v2:

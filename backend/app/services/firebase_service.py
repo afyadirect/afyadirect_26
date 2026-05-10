@@ -5,7 +5,8 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime
 import asyncio
 from ..config import settings
-
+from firebase_admin import credentials, firestore, initialize_app
+from google.cloud import firestore as google_firestore
 class FirebaseService:
     _initialized = False
     _db = None
@@ -55,8 +56,8 @@ class FirebaseService:
             user_ref.set({
                 'uid': user.uid,
                 'email': email,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'updatedAt': firestore.SERVER_TIMESTAMP,
+               'createdAt': google_firestore.SERVER_TIMESTAMP, # Use google_firestore here
+    'updatedAt': google_firestore.SERVER_TIMESTAMP,
                 **user_data
             })
             
@@ -79,7 +80,7 @@ class FirebaseService:
     async def update_user(cls, user_id: str, data: Dict[str, Any]):
         """Update user data in Firestore"""
         try:
-            data['updatedAt'] = firestore.SERVER_TIMESTAMP
+            data['updatedAt'] = google_firestore.SERVER_TIMESTAMP
             cls._db.collection('users').document(user_id).update(data)
             return True
         except Exception as e:
@@ -117,7 +118,7 @@ class FirebaseService:
     async def update_appointment(cls, appointment_id: str, data: Dict[str, Any]):
         """Update appointment status or details"""
         try:
-            data['updatedAt'] = firestore.SERVER_TIMESTAMP
+            data['updatedAt'] = google_firestore.SERVER_TIMESTAMP
             cls._db.collection('appointments').document(appointment_id).update(data)
             return True
         except Exception as e:
@@ -150,6 +151,17 @@ class FirebaseService:
         except Exception as e:
             raise Exception(f"Failed to list appointments: {str(e)}")
     
+    @classmethod
+    async def update_doctor_profile(cls, user_id: str, update_data: Dict[str, Any]):
+        try:
+            # Ensure there is code indented here!
+            update_dict = update_data.dict(exclude_unset=True)
+            await cls._db.collection('doctors').document(user_id).update(update_dict)
+        except Exception as e:
+            raise Exception(f"Failed to update doctor: {str(e)}")
+    
+    
+    
     # Chat Messages
     @classmethod
     async def send_message(cls, message_data: Dict[str, Any]) -> str:
@@ -158,7 +170,7 @@ class FirebaseService:
             message_ref = cls._db.collection('chat_messages').document()
             message_data.update({
                 'id': message_ref.id,
-                'sentAt': firestore.SERVER_TIMESTAMP,
+                'sentAt': google_firestore.SERVER_TIMESTAMP,
                 'isRead': False
             })
             message_ref.set(message_data)
@@ -203,7 +215,7 @@ class FirebaseService:
             payment_ref = cls._db.collection('payments').document()
             payment_data.update({
                 'id': payment_ref.id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
+                'createdAt': google_firestore.SERVER_TIMESTAMP,
                 'status': 'pending'
             })
             payment_ref.set(payment_data)
@@ -215,7 +227,7 @@ class FirebaseService:
     async def update_payment(cls, payment_id: str, data: Dict[str, Any]):
         """Update payment status"""
         try:
-            data['updatedAt'] = firestore.SERVER_TIMESTAMP
+            data['updatedAt'] = google_firestore.SERVER_TIMESTAMP
             cls._db.collection('payments').document(payment_id).update(data)
             return True
         except Exception as e:
@@ -246,7 +258,7 @@ class FirebaseService:
                 'message': message,
                 'type': notification_type,
                 'isRead': False,
-                'createdAt': firestore.SERVER_TIMESTAMP
+                'createdAt': google_firestore.SERVER_TIMESTAMP
             })
             return notification_ref.id
         except Exception as e:
@@ -258,7 +270,7 @@ class FirebaseService:
         try:
             notifications = cls._db.collection('notifications')\
                 .where('userId', '==', user_id)\
-                .order_by('createdAt', direction=firestore.Query.DESCENDING)\
+                .order_by('createdAt', direction=google_firestore.Query.DESCENDING)\
                 .limit(50)\
                 .get()
             return [notif.to_dict() for notif in notifications]

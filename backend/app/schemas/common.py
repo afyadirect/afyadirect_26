@@ -1,5 +1,5 @@
 # app/schemas/common.py
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, Any
 
 class ErrorResponse(BaseModel):

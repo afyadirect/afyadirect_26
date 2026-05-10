@@ -7,7 +7,7 @@ from ..models.user import UserRole, Language
 class UserCreate(BaseModel):
     full_name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
-    phone: str = Field(..., regex=r'^(?:\+?255|0)[67]\d{8}$')
+    phone: str = Field(..., pattern=r'^(?:\+?255|0)[67]\d{8}$')
     password: str = Field(..., min_length=8)
     role: UserRole = UserRole.PATIENT
     language: Language = Language.ENGLISH

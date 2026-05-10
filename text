@@ -95,8 +95,6 @@ API Documentation: http://localhost:8000/api/docs
 
 
 
-#  Install Flutter Dependencies
-cd ../frontend  # or cd .. if you're in backend folder
 
 # Get Flutter packages
 flutter pub get
@@ -113,3 +111,27 @@ firebase login
  Initialize Firebase in Flutter project
 flutterfire configure --project=afyadirect-xxxxx
 
+
+
+
+###########################
+# Build and start only 
+
+#backend redis
+
+sudo docker compose up -d --build
+sudo docker logs -f afyadirect-backend
+
+
+
+
+
+### SAFE 
+sudo docker compose down
+
+sudo docker compose up -d
+
+
+
+#THEN CHECK THE BACKEND HERE 
+http://localhost:8080/api/docs
