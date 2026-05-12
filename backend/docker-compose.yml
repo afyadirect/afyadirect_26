@@ -3,7 +3,7 @@ services:
     build: .
     container_name: afyadirect-backend
     ports:
-      - "8080:8000"
+      - "8000:8000"
     environment:
       # Use the service name 'redis_new' as the hostname
       - REDIS_URL=redis://redis_new:6379
@@ -25,9 +25,10 @@ services:
   redis_new:
     image: redis:7-alpine
     container_name: afyadirect-redis-v2
+    privileged: true  # <--- Add this
     init: true  # <--- CRITICAL: Prevents the "permission denied" zombie state
     ports:
-      - "6385:6379"
+      - "6379:6379"
     volumes:
       - redis-data-v2:/data
     restart: always # <--- Changed to always for better recovery

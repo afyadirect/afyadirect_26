@@ -48,12 +48,17 @@ async def get_doctor_availability(doctor_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# authenticatio to update the doctor
 @router.post("/{doctor_id}/availability")
 async def update_doctor_availability(
     doctor_id: str,
     schedule: dict,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user) # Re-enable this!
 ):
+    # The logic remains the same, but now it's protected
+    if current_user['role'] != 'doctor':
+        raise HTTPException(status_code=403, detail="Only doctors can update schedules")
+
     """Update doctor availability (doctor only)"""
     try:
         if current_user['role'] != 'doctor' and current_user['role'] != 'admin':

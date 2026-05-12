@@ -1,4 +1,5 @@
 # app/main.py (Updated)
+from backend.app.dependencies import get_current_user
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -59,8 +60,20 @@ app.add_middleware(
 # Include routers
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(users_router, prefix="/api/v1/users", tags=["Users"])
-app.include_router(appointments_router, prefix="/api/v1/appointments", tags=["Appointments"])
-app.include_router(doctors_router, prefix="/api/v1/doctors", tags=["Doctors"])
+app.include_router(
+    appointments_router,
+    prefix="/api/v1/appointments", 
+    tags=["Appointments"],
+    dependencies=[Depends(get_current_user)],
+    )
+app.include_router(
+    doctors_router, 
+    prefix="/api/v1/doctors",
+    
+                   tags=["Doctors"],
+                   dependencies=[Depends(get_current_user)] # Enforces auth for ALL doctor routes
+                   
+                   )
 app.include_router(payments_router, prefix="/api/v1/payments", tags=["Payments"])
 app.include_router(chat_router, prefix="/api/v1/chat", tags=["Chat"])
 app.include_router(prescriptions_router, prefix="/api/v1/prescriptions", tags=["Prescriptions"])

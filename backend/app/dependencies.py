@@ -5,41 +5,35 @@ import jwt
 from typing import Optional
 from .config import settings
 from .services.firebase_service import FirebaseService
+from firebase_admin import auth  # CRITICAL: Use Firebase Admin SDK
+from .services.firebase_service import FirebaseService
 
 security = HTTPBearer()
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    """Get current authenticated user"""
+    """Get current authenticated user via Firebase"""
     try:
-        token = credentials.credentials
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        id_token = credentials.credentials
+        # Verify the Firebase token directly with Firebase servers
+        decoded_token = auth.verify_id_token(id_token)
         
-        user_id = payload.get("sub")
-        role = payload.get("role")
+        user_id = decoded_token.get("uid")
         
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        
-        # Verify user exists and is active
+        # Fetch user profile from Firestore to get their Role
         user = await FirebaseService.get_user(user_id)
         if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        if not user.get('isActive', True):
-            raise HTTPException(status_code=403, detail="Account is disabled")
+            raise HTTPException(status_code=404, detail="User profile not found")
         
         return {
             "user_id": user_id,
-            "role": role or user.get('role')
+            "role": user.get('role'), # 'doctor', 'patient', or 'admin'
+            "email": decoded_token.get("email")
         }
-        
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
-
+        raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
+    
+    
+    
 async def get_current_admin(current_user: dict = Depends(get_current_user)):
     """Check if current user is admin"""
     if current_user['role'] != 'admin':

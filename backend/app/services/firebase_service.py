@@ -161,6 +161,79 @@ class FirebaseService:
             raise Exception(f"Failed to update doctor: {str(e)}")
     
     
+    # Add this inside the FirebaseService class
+    @classmethod
+    async def get_all_doctors(
+        cls, 
+        verified_only: bool = True, 
+        limit: int = 20, 
+        offset: int = 0,
+        specialty: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """Get all doctors from Firestore with filtering"""
+        try:
+            collection = cls._db.collection('doctors')
+            query = collection
+
+            if verified_only:
+                query = query.where('is_verified', '==', True)
+            
+            if specialty:
+                query = query.where('specialty', '==', specialty)
+
+            # Note: Complex filtering in Firestore often requires composite indexes.
+            # For now, we'll keep it simple.
+            doctors = query.limit(limit).offset(offset).get()
+            
+            return [doc.to_dict() for doc in doctors]
+        except Exception as e:
+            raise Exception(f"Failed to fetch doctors: {str(e)}")
+        
+        # --- DOCTOR CRUD ---
+    @classmethod
+    async def create_doctor_profile(cls, user_id: str, doctor_data: Dict[str, Any]):
+        try:
+            doctor_data.update({
+                'id': user_id,
+                'is_verified': False,
+                'rating': 5.0,
+                'createdAt': google_firestore.SERVER_TIMESTAMP
+            })
+            await cls._db.collection('doctors').document(user_id).set(doctor_data)
+            return user_id
+        except Exception as e:
+            raise Exception(f"Failed to create doctor: {str(e)}")
+
+    @classmethod
+    async def delete_doctor_profile(cls, user_id: str):
+        try:
+            await cls._db.collection('doctors').document(user_id).delete()
+            return True
+        except Exception as e:
+            raise Exception(f"Failed to delete doctor: {str(e)}")
+
+    # --- PATIENT CRUD ---
+    @classmethod
+    async def create_patient_profile(cls, user_id: str, patient_data: Dict[str, Any]):
+        try:
+            patient_data.update({
+                'id': user_id,
+                'createdAt': google_firestore.SERVER_TIMESTAMP
+            })
+            await cls._db.collection('patients').document(user_id).set(patient_data)
+            return user_id
+        except Exception as e:
+            raise Exception(f"Failed to create patient: {str(e)}")
+
+    @classmethod
+    async def get_patient(cls, user_id: str):
+        try:
+            doc = await cls._db.collection('patients').document(user_id).get()
+            return doc.to_dict() if doc.exists else None
+        except Exception as e:
+            raise Exception(f"Failed to fetch patient: {str(e)}")
+        
+        
     
     # Chat Messages
     @classmethod
