@@ -130,6 +130,7 @@ sudo docker compose down
 
 # 2. Safely re-spin up and build your clean instances
 sudo docker compose up -d --build
+sudo docker compose logs -f backend
 
 
 
